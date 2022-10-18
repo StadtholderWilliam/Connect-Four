@@ -3,30 +3,30 @@ package game;
 import java.util.Arrays;
 
 public class AI {
-    private int lookahead;
+    private int lookAhead;
     private Board board;
     // arbitrarily large score numbers used to signify a winning board
-    private int player1win = 999;
-    private int player2win = -999;
+    private int PLAYER_1_WIN = 999;
+    private int PLAYER_2_WIN = -999;
 
-    public AI(Board givenboard) {
-        // instantiate lookahead as 1 so it can be set later in setdifficulty
-        lookahead = 1;
-        board = givenboard;
+    public AI(Board givenBoard) {
+        // instantiate lookAhead as 1 so it can be set later in setdifficulty
+        lookAhead = 1;
+        board = givenBoard;
     }
 
-    public void setdifficulty(int difficulty) {
-        lookahead = difficulty;
+    public void setDifficulty(int difficulty) {
+        lookAhead = difficulty;
     }
 
-    public int getdifficulty() {
-        return lookahead;
+    public int getDifficulty() {
+        return lookAhead;
     }
 
-    public int getmove(char[][] board, Boolean playerturn) {
+    public int getMove(char[][] board, Boolean playerTurn) {
         // use recursive minimax to find the best move
-        char player = (playerturn) ? this.board.player1char : this.board.player2char;
-        Move move = minimax(board, player, lookahead);
+        char player = (playerTurn) ? this.board.player1Char : this.board.player2Char;
+        Move move = minimax(board, player, lookAhead);
         // find where the tile was added
         for (int i=0; i<board.length; i++) {
             for (int j=0; j<board[0].length; j++) {
@@ -40,80 +40,77 @@ public class AI {
         return 0;
     }
 
-    private Move minimax(char[][] board, char player, int lookahead) {
-        if (lookahead >= 1) {
+    private Move minimax(char[][] board, char player, int lookAhead) {
+        if (lookAhead >= 1) {
             // check if already reached wincondition:
-            int wincheck = boardscore(board);
-            if ((wincheck >= this.player1win) || (wincheck <= this.player2win)) {
-                return new Move(board, wincheck);
+            int winCheck = boardScore(board);
+            if ((winCheck >= this.PLAYER_1_WIN) || (winCheck <= this.PLAYER_2_WIN)) {
+                return new Move(board, winCheck);
             }
 
-            if (player == this.board.player1char) {
+            if (player == this.board.player1Char) {
                 // generate player 1's best move from the possibilities
-                char[][][] movelist = movegen(board, player);
+                char[][][] moveList = moveGen(board, player);
                 // checks if the character is null - empty list returned
-                if (movelist[0][0][0] == '\u0000') {
+                if (moveList[0][0][0] == '\u0000') {
                     // no more moves can be made - full board.
-                    return new Move(board, wincheck);
+                    return new Move(board, winCheck);
                 }
 
                 // rather than making moves of all of them, just
                 // find the lowest cost one and call minimax from that
-                // assuming at least 1 board in movelist if we got this far
-                Move plannedmove = minimax(movelist[0], this.board.player2char, lookahead-1);
-                // possible fix to thing: replace the returning move's board with its original
-                // movelist version - just to cut out all of the extra planned moves ahead
-                // that we don't need to know about.
-                int bestofmovelist = 0;
-                for (int i=1; i<movelist.length; i++) {
-                    Move comparemove = minimax(movelist[i], this.board.player2char, lookahead-1);
-                    if (plannedmove.boardscore < comparemove.boardscore) {
+                // assuming at least 1 board in moveList if we got this far
+                Move plannedMove = minimax(moveList[0], this.board.player2Char, lookAhead-1);
+                int bestOfMoveList = 0;
+                for (int i=1; i<moveList.length; i++) {
+                    Move compareMove = minimax(moveList[i], this.board.player2Char, lookAhead-1);
+                    if (plannedMove.boardScore < compareMove.boardScore) {
                         // better score, change planned move
-                        bestofmovelist = i;
-                        plannedmove.deepcopy(comparemove);
+                        bestOfMoveList = i;
+                        plannedMove.deepCopy(compareMove);
                     }
                 }
-                // instead of returning plannedmove which has the steps ahead board,
-                // just return its movelist board with plannedmove's boardscore
-                return new Move(movelist[bestofmovelist], plannedmove.boardscore);
+                // instead of returning plannedMove which has the steps ahead board,
+                // just return its moveList board with plannedMove's boardScore
+                return new Move(moveList[bestOfMoveList], plannedMove.boardScore);
             } else {
-                // player == board.player2char
+                // player == board.player2Char
                 // generate player 2's best move from the possibilities
-                char[][][] movelist = movegen(board, player);
+                char[][][] moveList = moveGen(board, player);
                 // checks if the character is null - empty list returned
-                if (movelist[0][0][0] == '\u0000') {
+                if (moveList[0][0][0] == '\u0000') {
                     // no more moves can be made - full board.
-                    return new Move(board, wincheck);
+                    return new Move(board, winCheck);
                 }
 
                 // rather than making moves of all of them, just
                 // find the lowest cost one and call minimax from that
-                // assuming at least 1 board in movelist if we got this far
-                Move plannedmove = minimax(movelist[0], this.board.player1char, lookahead-1);
-                // see above situation handling if player1char for more information on
-                // handling bestofmovelist and the returning move
-                int bestofmovelist = 0;
-                for (int i=1; i<movelist.length; i++) {
-                    Move comparemove = minimax(movelist[i], this.board.player1char, lookahead-1);
-                    if (plannedmove.boardscore > comparemove.boardscore) {
+                // assuming at least 1 board in moveList if we got this far
+                Move plannedMove = minimax(moveList[0], this.board.player1Char, lookAhead-1);
+                // see above situation handling if player1Char for more information on
+                // handling bestOfMoveList and the returning move
+                int bestOfMoveList = 0;
+                for (int i=1; i<moveList.length; i++) {
+                    Move compareMove = minimax(moveList[i], this.board.player1Char, lookAhead-1);
+                    if (plannedMove.boardScore > compareMove.boardScore) {
                         // better score, change planned move
-                        bestofmovelist = i;
-                        plannedmove.deepcopy(comparemove);
+                        bestOfMoveList = i;
+                        plannedMove.deepCopy(compareMove);
                     }
                 }
-                return new Move(movelist[bestofmovelist], plannedmove.boardscore);
+                return new Move(moveList[bestOfMoveList], plannedMove.boardScore);
             }
         } else {
-            // lookahead = 0, this is a leaf. find value of board directly
-            int value = boardscore(board);
+            // lookAhead = 0, this is a leaf. find value of board directly
+            int value = boardScore(board);
             return new Move(board, value);
         }
     }
 
-    private char[][][] movegen(char[][] board, char player) {
+    private char[][][] moveGen(char[][] board, char player) {
         // generate all possible boards (usually one for each column)
-        char [][][] nextstates = new char[board[0].length][board.length][board[0].length];
-        int nextopenspot = 0;
+        char [][][] nextStates = new char[board[0].length][board.length][board[0].length];
+        int nextOpenSpot = 0;
         // go through, just putting them to the next spot in the array
         // keep track of this next spot with above int
         // at the end: if it's smaller than length, then there's missing
@@ -125,13 +122,13 @@ public class AI {
             for (int j=1; j<board.length; j++) {
                 if (board[board.length-j][i] == '-') {
                     // deepcopy the board
-                    char[][] newstate = new char[board.length][];
+                    char[][] newState = new char[board.length][];
                     for (int k=0; k<board.length; k++) {
-                        newstate[k] = Arrays.copyOf(board[k], board[k].length);
+                        newState[k] = Arrays.copyOf(board[k], board[k].length);
                     }
-                    newstate[board.length-j][i] = player;
-                    nextstates[nextopenspot] = newstate;
-                    nextopenspot++;
+                    newState[board.length-j][i] = player;
+                    nextStates[nextOpenSpot] = newState;
+                    nextOpenSpot++;
                     // don't want to check any higher up on row, already placed
                     break;
                 }
@@ -139,205 +136,205 @@ public class AI {
         }
         // reduce size to remove empty spots
         // check if missing any columns
-        if (nextopenspot < board[0].length) {
+        if (nextOpenSpot < board[0].length) {
             // reduce size to remove empty spots in array
-            char [][][] smallnextstates = new char[nextopenspot][board.length][board[0].length];
-            for (int k=0; k<nextopenspot; k++) {
-                smallnextstates[k] = nextstates[k];
+            char [][][] smallNextStates = new char[nextOpenSpot][board.length][board[0].length];
+            for (int k=0; k<nextOpenSpot; k++) {
+                smallNextStates[k] = nextStates[k];
             }
-            return smallnextstates;
+            return smallNextStates;
         } else {
-            return nextstates;
+            return nextStates;
         }
     }
 
-    private int boardscore(char[][] board) {
+    private int boardScore(char[][] board) {
         // heuristic:
         // +1 for each p1 token in a line that could reach win condition
         //  (ie not blocked by a p2 token)
         // -1 for each p2 token in a line that could reach win condition
         int score = 0;
-        int numrows = this.board.getnumrows();
-        int numcols = this.board.getnumcols();
-        int winnum = this.board.getwinnum();
+        int numRows = this.board.getNumRows();
+        int numCols = this.board.getNumCols();
+        int winNum = this.board.getWinNum();
 
-        for (int i=numrows-1; i >= 0; i--) {
-            for (int j=0; j<numcols; j++) {
-                if (board[i][j] == this.board.player1char) {
+        for (int i=numRows-1; i >= 0; i--) {
+            for (int j=0; j<numCols; j++) {
+                if (board[i][j] == this.board.player1Char) {
                     // player 1 token
                     // check left
-                    if (j-winnum+1 >= 0) {
+                    if (j-winNum+1 >= 0) {
                         // start for loop going left - if token +1,
                         //  if enemy token set to 0 and break loop
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i][j-k] == this.board.player1char) {
-                                addingscore++;
-                            } else if (board[i][j-k] == this.board.player2char) {
-                                addingscore = 0;
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i][j-k] == this.board.player1Char) {
+                                addingScore++;
+                            } else if (board[i][j-k] == this.board.player2Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // don't need to check for a win, will be found earlier searching right
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check topleft
-                    if ((j-winnum+1 >= 0) && (i-winnum+1 >= 0)) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j-k] == this.board.player1char) {
-                                addingscore++;
-                            } else if (board[i-k][j-k] == this.board.player2char) {
-                                addingscore = 0;
+                    if ((j-winNum+1 >= 0) && (i-winNum+1 >= 0)) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j-k] == this.board.player1Char) {
+                                addingScore++;
+                            } else if (board[i-k][j-k] == this.board.player2Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == winnum) {
-                            return this.player1win;
+                        if (addingScore == winNum) {
+                            return this.PLAYER_1_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check top
-                    if (i-winnum+1 >= 0) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j] == this.board.player1char) {
-                                addingscore++;
-                            } else if (board[i-k][j] == this.board.player2char) {
-                                addingscore = 0;
+                    if (i-winNum+1 >= 0) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j] == this.board.player1Char) {
+                                addingScore++;
+                            } else if (board[i-k][j] == this.board.player2Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == winnum) {
-                            return this.player1win;
+                        if (addingScore == winNum) {
+                            return this.PLAYER_1_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check topright
-                    if ((j+winnum-1 < numcols) && (i-winnum+1 >= 0)) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j+k] == this.board.player1char) {
-                                addingscore++;
-                            } else if (board[i-k][j+k] == this.board.player2char) {
-                                addingscore = 0;
+                    if ((j+winNum-1 < numCols) && (i-winNum+1 >= 0)) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j+k] == this.board.player1Char) {
+                                addingScore++;
+                            } else if (board[i-k][j+k] == this.board.player2Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == winnum) {
-                            return this.player1win;
+                        if (addingScore == winNum) {
+                            return this.PLAYER_1_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check right
-                    if (j+winnum-1 < numcols) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i][j+k] == this.board.player1char) {
-                                addingscore++;
-                            } else if (board[i][j+k] == this.board.player2char) {
-                                addingscore = 0;
+                    if (j+winNum-1 < numCols) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i][j+k] == this.board.player1Char) {
+                                addingScore++;
+                            } else if (board[i][j+k] == this.board.player2Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == winnum) {
-                            return this.player1win;
+                        if (addingScore == winNum) {
+                            return this.PLAYER_1_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
 
-                } else if (board[i][j] == this.board.player2char) {
+                } else if (board[i][j] == this.board.player2Char) {
                     // player 2 token
                     // check left
-                    if (j-winnum+1 >= 0) {
+                    if (j-winNum+1 >= 0) {
                         // start for loop going left - if token -1,
                         //  if enemy token set to 0 and break loop
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i][j-k] == this.board.player2char) {
-                                addingscore--;
-                            } else if (board[i][j-k] == this.board.player1char) {
-                                addingscore = 0;
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i][j-k] == this.board.player2Char) {
+                                addingScore--;
+                            } else if (board[i][j-k] == this.board.player1Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == -winnum) {
-                            return this.player2win;
+                        if (addingScore == -winNum) {
+                            return this.PLAYER_2_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check topleft
-                    if ((j-winnum+1 >= 0) && (i-winnum+1 >= 0)) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j-k] == this.board.player2char) {
-                                addingscore--;
-                            } else if (board[i-k][j-k] == this.board.player1char) {
-                                addingscore = 0;
+                    if ((j-winNum+1 >= 0) && (i-winNum+1 >= 0)) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j-k] == this.board.player2Char) {
+                                addingScore--;
+                            } else if (board[i-k][j-k] == this.board.player1Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == -winnum) {
-                            return this.player2win;
+                        if (addingScore == -winNum) {
+                            return this.PLAYER_2_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check top
-                    if (i-winnum+1 >= 0) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j] == this.board.player2char) {
-                                addingscore--;
-                            } else if (board[i-k][j] == this.board.player1char) {
-                                addingscore = 0;
+                    if (i-winNum+1 >= 0) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j] == this.board.player2Char) {
+                                addingScore--;
+                            } else if (board[i-k][j] == this.board.player1Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == -winnum) {
-                            return this.player2win;
+                        if (addingScore == -winNum) {
+                            return this.PLAYER_2_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check topright
-                    if ((j+winnum-1 < numcols) && (i-winnum+1 >= 0)) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i-k][j+k] == this.board.player2char) {
-                                addingscore--;
-                            } else if (board[i-k][j+k] == this.board.player1char) {
-                                addingscore = 0;
+                    if ((j+winNum-1 < numCols) && (i-winNum+1 >= 0)) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i-k][j+k] == this.board.player2Char) {
+                                addingScore--;
+                            } else if (board[i-k][j+k] == this.board.player1Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == -winnum) {
-                            return this.player2win;
+                        if (addingScore == -winNum) {
+                            return this.PLAYER_2_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                     // check right
-                    if (j+winnum-1 < numcols) {
-                        int addingscore = 0;
-                        for (int k=0; k<winnum; k++) {
-                            if (board[i][j+k] == this.board.player2char) {
-                                addingscore--;
-                            } else if (board[i][j+k] == this.board.player1char) {
-                                addingscore = 0;
+                    if (j+winNum-1 < numCols) {
+                        int addingScore = 0;
+                        for (int k=0; k<winNum; k++) {
+                            if (board[i][j+k] == this.board.player2Char) {
+                                addingScore--;
+                            } else if (board[i][j+k] == this.board.player1Char) {
+                                addingScore = 0;
                                 break;
                             }
                         }
                         // checking for a win
-                        if (addingscore == -winnum) {
-                            return this.player2win;
+                        if (addingScore == -winNum) {
+                            return this.PLAYER_2_WIN;
                         }
-                        score += addingscore;
+                        score += addingScore;
                     }
                 }
             }
@@ -349,19 +346,19 @@ public class AI {
     // inner class for returning an object through minimax
     private class Move {
         char[][] board;
-        int boardscore;
+        int boardScore;
 
         Move(char[][] x, int y) {
             board = x;
-            boardscore = y;
+            boardScore = y;
         }
 
-        private void deepcopy(Move mv) {
+        private void deepCopy(Move mv) {
             // copies all internal data of another move
             for (int i=0; i<mv.board.length; i++) {
                 this.board[i] = Arrays.copyOf(mv.board[i], mv.board[i].length);
             }
-            this.boardscore = mv.boardscore;
+            this.boardScore = mv.boardScore;
         }
     }
 

@@ -29,9 +29,9 @@ public class ConnectFour {
                     while (true) {
                         String ailevel = scanner.nextLine();
                         try {
-                            int ainum = Integer.parseInt(ailevel);
-                            if ((ainum > 0) && (ainum < 11)) {
-                                ai.setdifficulty(ainum);
+                            int aiNum = Integer.parseInt(ailevel);
+                            if ((aiNum > 0) && (aiNum < 11)) {
+                                ai.setDifficulty(aiNum);
                                 break;
                             }
                             // didn't break, assume invalid
@@ -51,24 +51,24 @@ public class ConnectFour {
         }
 
         // start game & main game loop
-        Boolean gamecomplete = false;
-        Boolean playeroneturn = true;
-        while (!gamecomplete) {
+        Boolean gameComplete = false;
+        Boolean playerOneTurn = true;
+        while (!gameComplete) {
             // check for full board before starting the next turn
-            if (board.checkfortie()) {
+            if (board.checkForTie()) {
                 System.out.println("TIE GAME!");
                 break;
             }
-            if (playeroneturn) {
-                String startmessage = (aibool) ? "Your turn! " : "Player 1's turn! ";
-                System.out.println(startmessage + "Select a column to place a token.");
+            if (playerOneTurn) {
+                String startMessage = (aibool) ? "Your turn! " : "Player 1's turn! ";
+                System.out.println(startMessage + "Select a column to place a token.");
                 
             } else {
                 if (!aibool) {
                     System.out.println("Player 2's turn! Select a column to place a token.");
                 } else {
                     // ai's turn
-                    int difficulty = ai.getdifficulty();
+                    int difficulty = ai.getDifficulty();
                     if (difficulty > 6) {
                         if (difficulty > 8) {
                             if (difficulty > 9) {
@@ -85,37 +85,37 @@ public class ConnectFour {
                     }
                     
                     
-                    int aimovecol = ai.getmove(board.board, playeroneturn);
-                    board.place(aimovecol, playeroneturn);
-                    System.out.println("The AI places a token in column " + aimovecol + ".");
-                    // board.checkforwin just for specifically ai
-                    if (board.checkforwin(aimovecol, playeroneturn)) {
+                    int aiMoveCol = ai.getMove(board.board, playerOneTurn);
+                    board.place(aiMoveCol, playerOneTurn);
+                    System.out.println("The AI places a token in column " + aiMoveCol + ".");
+                    // board.checkForWin just for specifically ai
+                    if (board.checkForWin(aiMoveCol, playerOneTurn)) {
                         System.out.println("THE AI WINS!");
-                        board.printboard();
-                        gamecomplete = true;
+                        board.printBoard();
+                        gameComplete = true;
                         break;
                     } else {
                         // game incomplete, go to player's turn
-                        playeroneturn = !playeroneturn;
+                        playerOneTurn = !playerOneTurn;
                         continue;
                     }
                 }
                 
             }
             // game board is printed
-            board.printboard();
+            board.printBoard();
 
             // player makes a move by typing coords
-            Boolean validinput = false;
+            Boolean validInput = false;
 
-            int movecol=0;
-            while (!validinput) {
+            int moveCol=0;
+            while (!validInput) {
                 try {
                     int response = Integer.parseInt(scanner.nextLine());
-                    if (response >= 0 && response < board.getnumcols()) {
-                        if (board.place(response, playeroneturn)) {
-                            movecol = response;
-                            validinput = true;
+                    if (response >= 0 && response < board.getNumCols()) {
+                        if (board.place(response, playerOneTurn)) {
+                            moveCol = response;
+                            validInput = true;
                         } else {
                             System.out.println("Invalid response, that column is full.");
                         }
@@ -130,10 +130,10 @@ public class ConnectFour {
                 
             }
 
-            if (board.checkforwin(movecol, playeroneturn)) {
+            if (board.checkForWin(moveCol, playerOneTurn)) {
                 // the current player just won the game!
-                gamecomplete = true;
-                if (playeroneturn) {
+                gameComplete = true;
+                if (playerOneTurn) {
                     if (aibool) {
                         System.out.println("YOU WIN!");
                     } else {
@@ -145,11 +145,11 @@ public class ConnectFour {
                     }
                     // ai's check for win above in its turn
                 }
-                board.printboard();
+                board.printBoard();
                 
             } else {
                 // game incomplete, go to next turn
-                playeroneturn = !playeroneturn;
+                playerOneTurn = !playerOneTurn;
             }
         }
         System.out.println("Thank you for playing!");
