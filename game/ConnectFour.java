@@ -25,7 +25,6 @@ public class ConnectFour {
                     // create new AI opponent
                     aibool = true;
                     System.out.println("Please select the difficulty of the AI: (1-10)");
-                    System.out.println("(Difficulties 7-10 are noticeably slower)");
                     while (true) {
                         String ailevel = scanner.nextLine();
                         try {
@@ -69,17 +68,8 @@ public class ConnectFour {
                 } else {
                     // ai's turn
                     int difficulty = ai.getDifficulty();
-                    if (difficulty > 6) {
-                        if (difficulty > 8) {
-                            if (difficulty > 9) {
-                                System.out.println("The AI's turn! (This may take several minutes)");
-                            } else {
-                                System.out.println("The AI's turn! (This may take about half a minute)");
-                            }
-                        } else {
-                            System.out.println("The AI's turn! (This may take a few seconds)");
-                        }
-                        
+                    if (difficulty > 7) {
+                        System.out.println("The AI's turn! (This may take a few seconds)");
                     } else {
                         System.out.println("The AI's turn!");
                     }

@@ -6,8 +6,10 @@ public class AI {
     private int lookAhead;
     private Board board;
     // arbitrarily large score numbers used to signify a winning board
-    private int PLAYER_1_WIN = 999;
-    private int PLAYER_2_WIN = -999;
+    private static final int PLAYER_1_WIN = 999;
+    private static final int PLAYER_2_WIN = -999;
+    // another number to mimic infinity as an int - named seperately for readability
+    private static final int INFINITY = 999;
 
     public AI(Board givenBoard) {
         // instantiate lookAhead as 1 so it can be set later in setdifficulty
@@ -26,7 +28,7 @@ public class AI {
     public int getMove(char[][] board, Boolean playerTurn) {
         // use recursive minimax to find the best move
         char player = (playerTurn) ? this.board.player1Char : this.board.player2Char;
-        Move move = minimax(board, player, lookAhead);
+        Move move = minimax(board, player, lookAhead, -INFINITY, INFINITY);
         // find where the tile was added
         for (int i=0; i<board.length; i++) {
             for (int j=0; j<board[0].length; j++) {
@@ -35,16 +37,16 @@ public class AI {
                 }
             }
         }
-        // This should not be reached - maybe the board didn't get deepcopied?
+        // This should not be reached
         System.out.println("AI ERROR - MOVE NOT FOUND");
         return 0;
     }
 
-    private Move minimax(char[][] board, char player, int lookAhead) {
+    private Move minimax(char[][] board, char player, int lookAhead, int alpha, int beta) {
         if (lookAhead >= 1) {
             // check if already reached wincondition:
             int winCheck = boardScore(board);
-            if ((winCheck >= this.PLAYER_1_WIN) || (winCheck <= this.PLAYER_2_WIN)) {
+            if ((winCheck >= PLAYER_1_WIN) || (winCheck <= PLAYER_2_WIN)) {
                 return new Move(board, winCheck);
             }
 
@@ -60,14 +62,19 @@ public class AI {
                 // rather than making moves of all of them, just
                 // find the lowest cost one and call minimax from that
                 // assuming at least 1 board in moveList if we got this far
-                Move plannedMove = minimax(moveList[0], this.board.player2Char, lookAhead-1);
+                Move plannedMove = minimax(moveList[0], this.board.player2Char, lookAhead-1, alpha, beta);
                 int bestOfMoveList = 0;
                 for (int i=1; i<moveList.length; i++) {
-                    Move compareMove = minimax(moveList[i], this.board.player2Char, lookAhead-1);
+                    Move compareMove = minimax(moveList[i], this.board.player2Char, lookAhead-1, alpha, beta);
                     if (plannedMove.boardScore < compareMove.boardScore) {
                         // better score, change planned move
                         bestOfMoveList = i;
                         plannedMove = compareMove;
+                    }
+                    // alpha-beta pruning
+                    alpha = Math.max(alpha, plannedMove.boardScore);
+                    if (beta <= alpha) {
+                        break;
                     }
                 }
                 // instead of returning plannedMove which has the steps ahead board,
@@ -86,16 +93,21 @@ public class AI {
                 // rather than making moves of all of them, just
                 // find the lowest cost one and call minimax from that
                 // assuming at least 1 board in moveList if we got this far
-                Move plannedMove = minimax(moveList[0], this.board.player1Char, lookAhead-1);
+                Move plannedMove = minimax(moveList[0], this.board.player1Char, lookAhead-1, alpha, beta);
                 // see above situation handling if player1Char for more information on
                 // handling bestOfMoveList and the returning move
                 int bestOfMoveList = 0;
                 for (int i=1; i<moveList.length; i++) {
-                    Move compareMove = minimax(moveList[i], this.board.player1Char, lookAhead-1);
+                    Move compareMove = minimax(moveList[i], this.board.player1Char, lookAhead-1, alpha, beta);
                     if (plannedMove.boardScore > compareMove.boardScore) {
                         // better score, change planned move
                         bestOfMoveList = i;
                         plannedMove = compareMove;
+                    }
+                    // alpha-beta pruning
+                    beta = Math.min(beta, plannedMove.boardScore);
+                    if (beta <= alpha) {
+                        break;
                     }
                 }
                 return new Move(moveList[bestOfMoveList], plannedMove.boardScore);
@@ -191,7 +203,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == winNum) {
-                            return this.PLAYER_1_WIN;
+                            return PLAYER_1_WIN;
                         }
                         score += addingScore;
                     }
@@ -208,7 +220,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == winNum) {
-                            return this.PLAYER_1_WIN;
+                            return PLAYER_1_WIN;
                         }
                         score += addingScore;
                     }
@@ -225,7 +237,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == winNum) {
-                            return this.PLAYER_1_WIN;
+                            return PLAYER_1_WIN;
                         }
                         score += addingScore;
                     }
@@ -242,7 +254,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == winNum) {
-                            return this.PLAYER_1_WIN;
+                            return PLAYER_1_WIN;
                         }
                         score += addingScore;
                     }
@@ -264,7 +276,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == -winNum) {
-                            return this.PLAYER_2_WIN;
+                            return PLAYER_2_WIN;
                         }
                         score += addingScore;
                     }
@@ -281,7 +293,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == -winNum) {
-                            return this.PLAYER_2_WIN;
+                            return PLAYER_2_WIN;
                         }
                         score += addingScore;
                     }
@@ -298,7 +310,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == -winNum) {
-                            return this.PLAYER_2_WIN;
+                            return PLAYER_2_WIN;
                         }
                         score += addingScore;
                     }
@@ -315,7 +327,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == -winNum) {
-                            return this.PLAYER_2_WIN;
+                            return PLAYER_2_WIN;
                         }
                         score += addingScore;
                     }
@@ -332,7 +344,7 @@ public class AI {
                         }
                         // checking for a win
                         if (addingScore == -winNum) {
-                            return this.PLAYER_2_WIN;
+                            return PLAYER_2_WIN;
                         }
                         score += addingScore;
                     }
