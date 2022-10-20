@@ -67,7 +67,7 @@ public class AI {
                     if (plannedMove.boardScore < compareMove.boardScore) {
                         // better score, change planned move
                         bestOfMoveList = i;
-                        plannedMove.deepCopy(compareMove);
+                        plannedMove = compareMove;
                     }
                 }
                 // instead of returning plannedMove which has the steps ahead board,
@@ -95,7 +95,7 @@ public class AI {
                     if (plannedMove.boardScore > compareMove.boardScore) {
                         // better score, change planned move
                         bestOfMoveList = i;
-                        plannedMove.deepCopy(compareMove);
+                        plannedMove = compareMove;
                     }
                 }
                 return new Move(moveList[bestOfMoveList], plannedMove.boardScore);
@@ -351,14 +351,6 @@ public class AI {
         Move(char[][] x, int y) {
             board = x;
             boardScore = y;
-        }
-
-        private void deepCopy(Move mv) {
-            // copies all internal data of another move
-            for (int i=0; i<mv.board.length; i++) {
-                this.board[i] = Arrays.copyOf(mv.board[i], mv.board[i].length);
-            }
-            this.boardScore = mv.boardScore;
         }
     }
 
