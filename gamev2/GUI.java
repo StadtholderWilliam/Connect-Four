@@ -1,3 +1,5 @@
+package gamev2;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -181,6 +183,10 @@ public class GUI implements ActionListener {
 
     void createGamePage(JFrame frame) {
         // tab with game grid and pieces
+        frame.setSize((numCols*50+40), (numRows*50+40));
+        JPanel pnl = new JPanel();
+        GridLayout lyt = new GridLayout(numCols, numRows);
+        pnl.setLayout(lyt);
     }
 
     public static void main(String[] args) {
@@ -191,7 +197,9 @@ public class GUI implements ActionListener {
         switch (e.getActionCommand()) {
             case "start":
                 // main menu > game screen
-                // TODO: shift screen when game page created
+                mainPanel.setVisible(false);
+                // TODO: figure how to get frame or create game page
+                //createGamePage(frame);
                 break;
             case "options":
                 // main menu > options menu
