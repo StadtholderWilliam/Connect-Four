@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 public class GUI implements ActionListener {
     // changeable through main menu
     static int aiDifficulty = 3;
+    static boolean aiBool = true;
 
     // changeable through the options menu
     static int numRows = 6;
@@ -51,11 +52,16 @@ public class GUI implements ActionListener {
         pnl.add(l1);
 
         JRadioButton aiButton = new JRadioButton("AI Opponent", true);
-        aiButton.setToolTipText("Play against a variable-difficulty AI Opponent.");
         aiButton.setBounds(30, 60, 100, 20);
+        aiButton.setActionCommand("aitrue");
+        aiButton.addActionListener(this);
+        aiButton.setToolTipText("Play against a variable-difficulty AI Opponent.");
         pnl.add(aiButton);
+
         JRadioButton humanButton = new JRadioButton("Human Opponent");
         humanButton.setBounds(30, 100, 150, 20);
+        humanButton.setActionCommand("aifalse");
+        humanButton.addActionListener(this);
         humanButton.setToolTipText("Play against a human opponent using the same keyboard.");
         pnl.add(humanButton);
 
@@ -183,10 +189,25 @@ public class GUI implements ActionListener {
 
     void createGamePage(JFrame frame) {
         // tab with game grid and pieces
+        // resize frame when switching to it but after creating it?
         frame.setSize((numCols*50+40), (numRows*50+40));
         JPanel pnl = new JPanel();
         GridLayout lyt = new GridLayout(numCols, numRows);
         pnl.setLayout(lyt);
+
+        // modify - create a game object that you feed moves into and receive 
+        // a boardstate... put the main loop in GUI?
+        // ConnectGame game = ConnectFour.startGame(----)
+        // GameState state = game.getBoardState()
+        // if (state.winStatus) {
+        //     "the game has ended" 
+        // }
+        // 
+        // when a button clicked on:
+        // game.placemove(column)
+        // if ai: game.generateAiMove() then game.getBoardState()
+        ConnectFour game = new ConnectFour(numRows, numCols, winNum, aiBool, aiDifficulty);
+        
     }
 
     public static void main(String[] args) {
@@ -210,6 +231,14 @@ public class GUI implements ActionListener {
                 // options menu > main menu
                 optPanel.setVisible(false);
                 mainPanel.setVisible(true);
+                break;
+            case "aitrue":
+                // main menu: ai opponent selected
+                aiBool = true;
+                break;
+            case "aifalse":
+                // main menu: human opponent selected
+                aiBool = false;
                 break;
         }
     }
