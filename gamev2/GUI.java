@@ -7,6 +7,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import gamev2.ConnectFour.GameState;
 
 public class GUI implements ActionListener {
     // changeable through main menu
@@ -18,27 +20,28 @@ public class GUI implements ActionListener {
     static int numCols = 7;
     static int winNum = 4;
 
-    // panels
-    JPanel mainPanel, optPanel;
+    // panels and frame
+    JPanel mainPanel, optPanel, gamePanel;
+    JFrame appFrame;
 
     GUI() {
-        JFrame frame = new JFrame("Connect Four");
+        appFrame = new JFrame("Connect Four");
         Image icon = Toolkit.getDefaultToolkit().getImage("images/game.png");
-        frame.setIconImage(icon);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        frame.setSize(250,300);
+        appFrame.setIconImage(icon);
+        appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        appFrame.setResizable(false);
+        appFrame.setSize(250,300);
         CardLayout crd = new CardLayout();
-        frame.setLayout(crd);
+        appFrame.setLayout(crd);
 
         mainPanel = createMainPage();
         optPanel = createOptionsPage();
 
-        frame.add(mainPanel);
-        frame.add(optPanel);
+        appFrame.add(mainPanel);
+        appFrame.add(optPanel);
         
         optPanel.setVisible(false);
-        frame.setVisible(true);  
+        appFrame.setVisible(true);  
     }
 
     JPanel createMainPage() {
@@ -187,27 +190,127 @@ public class GUI implements ActionListener {
         return pnl;
     }
 
-    void createGamePage(JFrame frame) {
+    JPanel createGamePage() {
         // tab with game grid and pieces
-        // resize frame when switching to it but after creating it?
-        frame.setSize((numCols*50+40), (numRows*50+40));
-        JPanel pnl = new JPanel();
-        GridLayout lyt = new GridLayout(numCols, numRows);
-        pnl.setLayout(lyt);
+        ImageIcon imgEmpty = new ImageIcon("images/empty2_32.png");
+        ImageIcon imgP1 = new ImageIcon("images/player1_32.png");
+        ImageIcon imgP2 = new ImageIcon("images/player2_32.png");
+        ImageIcon imgPlaceable = new ImageIcon("images/empty1_32.png");
+        int width = imgEmpty.getIconWidth();
+        int height = imgEmpty.getIconHeight();
 
-        // modify - create a game object that you feed moves into and receive 
-        // a boardstate... put the main loop in GUI?
-        // ConnectGame game = ConnectFour.startGame(----)
-        // GameState state = game.getBoardState()
-        // if (state.winStatus) {
-        //     "the game has ended" 
-        // }
-        // 
-        // when a button clicked on:
-        // game.placemove(column)
-        // if ai: game.generateAiMove() then game.getBoardState()
+        appFrame.setSize((numCols*width+200), (numRows*height+200));
+        JPanel pnl = new JPanel();
+        GridLayout lyt = new GridLayout(numRows, numCols);
+        pnl.setLayout(lyt);
+        pnl.setBounds(0, 0, numCols*width, numRows*height);
+
         ConnectFour game = new ConnectFour(numRows, numCols, winNum, aiBool, aiDifficulty);
-        
+
+        ArrayList<ArrayList<JButton>> grid = new ArrayList<ArrayList<JButton>>(numRows);
+        // set up render loop for board buttons
+        for (int i=0; i<numRows; i++) {
+            ArrayList<JButton> row = new ArrayList<JButton>(numCols);
+            for (int j=0; j<numCols; j++) {
+                JButton tempButton = new JButton(imgEmpty);
+                tempButton.setContentAreaFilled(false);
+                tempButton.addActionListener(
+                    new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            if (tempButton.getIcon() == imgPlaceable) {
+                                // place token on gui based on player turn
+                                if (game.getPlayerTurn()) {
+                                    tempButton.setIcon(imgP1);
+                                } else {
+                                    tempButton.setIcon(imgP2);
+                                }
+                                
+                                // make above tile valid, place move in game board
+                                int col = row.indexOf(tempButton);
+                                int aboveRow = game.placeMove(col);
+
+                                if (aboveRow >= 0) {
+                                    grid.get(aboveRow).get(col).setIcon(imgPlaceable);
+                                }
+
+                                // player turns split into two call so returning
+                                //  to change the gui is easier
+                                GameState state = game.endTurn(col);
+                                if (state.tiedGame) {
+                                    tieGameAlert(grid, imgPlaceable, imgEmpty);
+                                } else if (state.wonGame) {
+                                    // get opposite of playerTurn, it switched
+                                    winGameAlert(!(game.playerTurn), grid, imgPlaceable, imgEmpty);
+                                }
+                                // make enemy's turn
+                                if (aiBool && !state.tiedGame && !state.wonGame) {
+                                    // if ai opponent, make its move in response
+                                    int move = game.aiMove();
+                                    for (int k=0; k<numRows; k++) {
+                                        if (grid.get(k).get(move).getIcon() == imgPlaceable) {
+                                            // look for placeable tile, put it there
+                                            // ai will always be player2
+                                            grid.get(k).get(move).setIcon(imgP2);
+                                            if (k>0) {
+                                                // make tile above placeable
+                                                grid.get(k-1).get(move).setIcon(imgPlaceable);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                    state = game.endTurn(move);
+                                    if (state.tiedGame) {
+                                        tieGameAlert(grid, imgPlaceable, imgEmpty);
+                                    } else if (state.wonGame) {
+                                        winGameAlert(!(game.playerTurn), grid, imgPlaceable, imgEmpty);
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                );
+                pnl.add(tempButton);
+                row.add(tempButton);
+            }
+            grid.add(row);
+        }
+
+        // set up placeable tiles
+        for (int i=0; i<numCols; i++) {
+            grid.get(numRows-1).get(i).setIcon(imgPlaceable);
+        }
+
+        return pnl;
+    }
+
+    void tieGameAlert(ArrayList<ArrayList<JButton>> grid, ImageIcon place, ImageIcon empty) {
+        for (int i=0; i<numCols; i++) {
+            for (int j=0; j<numRows; j++) {
+                JButton tar = grid.get(j).get(i);
+                if (tar.getIcon() == place) {
+                    tar.setIcon(empty);
+                    break;
+                }
+            }
+        }
+        System.out.println("TIE GAME!");
+    }
+
+    void winGameAlert(boolean player, ArrayList<ArrayList<JButton>> grid, ImageIcon place, ImageIcon empty) {
+        // yes
+        for (int i=0; i<numCols; i++) {
+            for (int j=0; j<numRows; j++) {
+                JButton tar = grid.get(j).get(i);
+                if (tar.getIcon() == place) {
+                    tar.setIcon(empty);
+                    break;
+                }
+            }
+        }
+
+        char playerChar = (player) ? '1' : '2';
+        System.out.println("PLAYER "+playerChar+" WINS!");
     }
 
     public static void main(String[] args) {
@@ -216,11 +319,13 @@ public class GUI implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
-            case "start":
+            case "startgame":
                 // main menu > game screen
                 mainPanel.setVisible(false);
-                // TODO: figure how to get frame or create game page
-                //createGamePage(frame);
+                gamePanel = createGamePage();
+                appFrame.add(gamePanel);
+                appFrame.remove(mainPanel);
+                appFrame.remove(optPanel);
                 break;
             case "options":
                 // main menu > options menu

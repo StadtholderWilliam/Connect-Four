@@ -3,20 +3,20 @@ package gamev2;
 public class Board {
     char[][] board;
     private int numRows, numCols, winNum;
-    public char player1Char, player2Char;
+    public char player1Char, player2Char, emptyChar;
 
     public Board(int rows, int cols, int win) {
-        // TODO: change variables and printBoard() to fit new gui
         numRows = rows;
         numCols = cols;
         winNum = win;
         player1Char = 'X';
         player2Char = 'O';
+        emptyChar = '-';
         board = new char[numRows][numCols];
         // set up empty board
         for (int i=0; i<numRows;i++) {
             for (int j=0; j<numCols;j++) {
-                board[i][j] = '-';
+                board[i][j] = emptyChar;
             }
         }
     }
@@ -33,6 +33,7 @@ public class Board {
         return winNum;
     }
 
+    // only used for debugging in v2
     public void printBoard() {
         for (int i=0; i<numCols; i++) {
             System.out.print('_');
@@ -56,7 +57,7 @@ public class Board {
     // bool playerturn: true if player 1's turn, false if player 2's turn.
     public boolean place(int column, boolean playerTurn) {
         for (int i=numRows-1; i>=0; i--) {
-            if (board[i][column] == '-') {
+            if (board[i][column] == emptyChar) {
                 board[i][column] = (playerTurn) ? player1Char : player2Char;
                 return true;
             }
@@ -179,7 +180,7 @@ public class Board {
 
     public boolean checkForTie() {
         for (int i=0; i<numCols; i++) {
-            if (board[0][i] == '-') {
+            if (board[0][i] == emptyChar) {
                 // board still has an empty space, not tied.
                 return false;
             }
