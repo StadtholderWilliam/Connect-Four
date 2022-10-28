@@ -294,7 +294,24 @@ public class GUI implements ActionListener {
                 }
             }
         }
-        System.out.println("TIE GAME!");
+        String s1 = "Yes";
+        String s2 = "No";
+        Object[] options = {s1, s2};
+        int popUp = JOptionPane.showOptionDialog(appFrame,
+        "TIE GAME!\n"+"Return to Main Menu?",
+                "Game Complete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                s1);
+        if (popUp == JOptionPane.YES_OPTION) {
+            appFrame.add(mainPanel);
+            appFrame.add(optPanel);
+            appFrame.remove(gamePanel);
+            appFrame.setSize(250,300);
+            optPanel.setVisible(false);
+        }
     }
 
     void winGameAlert(boolean player, ArrayList<ArrayList<JButton>> grid, ImageIcon place, ImageIcon empty) {
@@ -308,9 +325,27 @@ public class GUI implements ActionListener {
                 }
             }
         }
-
         char playerChar = (player) ? '1' : '2';
-        System.out.println("PLAYER "+playerChar+" WINS!");
+        String s1 = "Yes";
+        String s2 = "No";
+        Object[] options = {s1, s2};
+        int popUp = JOptionPane.showOptionDialog(appFrame,
+        "PLAYER "+playerChar+" WINS!\n"+
+        "Return to Main Menu?",
+                "Game Complete",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                s1);
+        if (popUp == JOptionPane.YES_OPTION) {
+            appFrame.add(mainPanel);
+            appFrame.add(optPanel);
+            appFrame.remove(gamePanel);
+            appFrame.setSize(250,300);
+            optPanel.setVisible(false);
+        }
+
     }
 
     public static void main(String[] args) {
