@@ -349,7 +349,7 @@ public class GUI implements ActionListener {
     }
 
     public static void main(String[] args) {
-        GUI content = new GUI();
+        new GUI();
     }
 
     public void actionPerformed(ActionEvent e) {
