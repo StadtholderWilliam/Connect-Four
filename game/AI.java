@@ -53,8 +53,8 @@ public class AI {
             if (player == this.board.player1Char) {
                 // generate player 1's best move from the possibilities
                 char[][][] moveList = moveGen(board, player);
-                // checks if the character is null - empty list returned
-                if (moveList[0][0][0] == '\u0000') {
+                // checks if empty list returned
+                if (moveList.length == 0) {
                     // no more moves can be made - full board.
                     return new Move(board, winCheck);
                 }
@@ -84,8 +84,8 @@ public class AI {
                 // player == board.player2Char
                 // generate player 2's best move from the possibilities
                 char[][][] moveList = moveGen(board, player);
-                // checks if the character is null - empty list returned
-                if (moveList[0][0][0] == '\u0000') {
+                // checks if empty list returned
+                if (moveList.length == 0) {
                     // no more moves can be made - full board.
                     return new Move(board, winCheck);
                 }
@@ -131,7 +131,7 @@ public class AI {
             // it's board[row][col] and we want to go column by column
             //  going from the bottom row to the top.
             // i goes through columns, j goes through rows
-            for (int j=1; j<board.length; j++) {
+            for (int j=1; j<=board.length; j++) {
                 if (board[board.length-j][i] == '-') {
                     // deepcopy the board
                     char[][] newState = new char[board.length][];
